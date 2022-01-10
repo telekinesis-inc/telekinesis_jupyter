@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/telekinesis-inc/telekinesis_jupyter",
     packages=setuptools.find_packages(),
-    install_requires=["telekinesis", "Ipython"],
+    install_requires=["telekinesis"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
