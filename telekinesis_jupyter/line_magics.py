@@ -5,12 +5,11 @@ from IPython.core.magic import register_line_cell_magic
 import telekinesis as tk
 
 class RemoteKernels:
-    def __init__(self, *instances, print_callback=print, input_callback=input):
+    def __init__(self, *instances, print_callback=print):
         self.instances = deque(instances)
         self.last_magic = None
         self.magic_history = []
         self.print_callback = print_callback
-        self.input_callback = input_callback
         
         async def register_line_magics():
             await asyncio.sleep(0.00000001)
@@ -69,25 +68,24 @@ class RemoteKernels:
                 
         asyncio.create_task(register_line_magics())
 
-    async def call_one(self, code, inputs=None, output=None, instance=None, scope=None, print_callback=None, input_callback=None):
+    async def call_one(self, code, inputs=None, output=None, instance=None, scope=None, print_callback=None):
         if instance is None:
             instance = self.instances.popleft()
             self.instances.append(instance)
         scope = scope or instance._session.instance_id
         print_callback = print_callback or self.print_callback
-        input_callback = input_callback or self.input_callback
         if output:
-            return await instance.execute(code, inputs, scope=scope)[output]
+            return await instance.execute(code, inputs, scope=scope, print_callback=print_callback)[output]
         return await instance.execute(code, inputs)
     
-    async def call_all(self, code, inputs=None, output=None, scope=None, print_callback=None, input_callback=None):
-        await asyncio.gather(*[self.call_one(code, inputs, output, i, scope, print_callback, input_callback) for i in self.instances])
+    async def call_all(self, code, inputs=None, output=None, scope=None, print_callback=None):
+        await asyncio.gather(*[self.call_one(code, inputs, output, i, scope, print_callback) for i in self.instances])
     
-    async def call_map(self, code, variable_name, iterable, inputs=None, output=None, scope=None, print_callback=None, input_callback=None):
+    async def call_map(self, code, variable_name, iterable, inputs=None, output=None, scope=None, print_callback=None):
         tasks = []
         for item in iterable:
             item_inputs = (inputs or {}).copy()
             item_inputs[variable_name] = item
-            tasks.append(self.call_one(code, item_inputs, output, None, scope, print_callback, input_callback))
+            tasks.append(self.call_one(code, item_inputs, output, None, scope, print_callback))
         return await asyncio.gather(*tasks)
 
