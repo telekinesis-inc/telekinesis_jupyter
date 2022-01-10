@@ -78,7 +78,7 @@ class RemoteKernels:
         return await instance.execute(code, inputs)
     
     async def call_all(self, code, inputs=None, output=None, scope=None, print_callback=None):
-        await asyncio.gather(*[self.call_one(code, inputs, output, i, scope, print_callback) for i in self.instances])
+        return await asyncio.gather(*[self.call_one(code, inputs, output, i, scope, print_callback) for i in self.instances])
     
     async def call_map(self, code, variable_name, iterable, inputs=None, output=None, scope=None, print_callback=None):
         tasks = []
