@@ -75,7 +75,7 @@ class RemoteKernels:
         print_callback = print_callback or self.print_callback
         if output:
             return await instance.execute(code, inputs, scope=scope, print_callback=print_callback)[output]
-        return await instance.execute(code, inputs)
+        return await instance.execute(code, inputs, scope=scope, print_callback=print_callback)
     
     async def call_all(self, code, inputs=None, output=None, scope=None, print_callback=None):
         return await asyncio.gather(*[self.call_one(code, inputs, output, i, scope, print_callback) for i in self.instances])
