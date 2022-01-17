@@ -19,7 +19,7 @@ class RemoteKernels:
             args, kwargs = [], {}
             eval(
                 "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+line,
-                {'args': args, 'kwargs': kwargs}
+                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
             )
             t = asyncio.create_task(self.call_one(cell, *args, **kwargs))
             self.last_magic = t
@@ -29,7 +29,7 @@ class RemoteKernels:
             args, kwargs = [], {}
             eval(
                 "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+line,
-                {'args': args, 'kwargs': kwargs}
+                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
             )
             t = asyncio.create_task(self.call_all(cell, *args, **kwargs))
             self.last_magic = t
@@ -39,7 +39,7 @@ class RemoteKernels:
             args, kwargs = [], {}
             eval(
                 "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+line,
-                {'args': args, 'kwargs': kwargs}
+                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
             )
             t = asyncio.create_task(self.call_map(cell, *args, **kwargs))
             self.last_magic = t
@@ -50,9 +50,9 @@ class RemoteKernels:
             f_name, *rest = line.split(' ')
             eval(
                 "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+' '.join(rest),
-                {'args': args, 'kwargs': kwargs}
+                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
             )
-            f = eval(f_name)
+            f = ipython.ns_table['user_global'].items()[f_name]
             if isinstance(f, tk.Telekinesis):
                 t = asyncio.create_task(f(cell, *args, **kwargs)._execute())
             elif not asyncio.iscoroutine(f):
