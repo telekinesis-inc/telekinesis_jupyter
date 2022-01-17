@@ -18,8 +18,8 @@ class RemoteKernels:
         def call_one(line, cell):
             args, kwargs = [], {}
             eval(
-                "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+line,
-                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
+                "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+line,
+                {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
             t = asyncio.create_task(self.call_one(cell, *args, **kwargs))
             self.last_magic = t
@@ -28,8 +28,8 @@ class RemoteKernels:
         def call_all(line, cell):
             args, kwargs = [], {}
             eval(
-                "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+line,
-                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
+                "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+line,
+                {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
             t = asyncio.create_task(self.call_all(cell, *args, **kwargs))
             self.last_magic = t
@@ -38,8 +38,8 @@ class RemoteKernels:
         def call_map(line, cell):
             args, kwargs = [], {}
             eval(
-                "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+line,
-                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
+                "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+line,
+                {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
             t = asyncio.create_task(self.call_map(cell, *args, **kwargs))
             self.last_magic = t
@@ -49,8 +49,8 @@ class RemoteKernels:
             args, kwargs = [], {}
             f_name, *rest = line.split(' ')
             eval(
-                "(lambda *a, **kw: args.extend(a) or kwargs.update(kw))"+' '.join(rest),
-                {**ipython.ns_table['user_global'], 'args': args, 'kwargs': kwargs}
+                "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+' '.join(rest),
+                {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
             f = ipython.ns_table['user_global'].items()[f_name]
             if isinstance(f, tk.Telekinesis):
