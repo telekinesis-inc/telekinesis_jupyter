@@ -15,33 +15,33 @@ class RemoteKernels:
     async def register_line_magics(self, ipython, self_name=None):
         self_name = self_name or [ k for k,v in ipython.ns_table['user_global'].items() if v is self][0]
         
-        def call_one(line, cell):
+        def run_one(line, cell):
             args, kwargs = [], {}
             eval(
                 "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+line,
                 {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
-            t = asyncio.create_task(self.call_one(cell, *args, **kwargs))
+            t = asyncio.create_task(self.run_one(cell, *args, **kwargs))
             self.last_magic = t
             self.magic_history.append(t)
             
-        def call_all(line, cell):
+        def run_all(line, cell):
             args, kwargs = [], {}
             eval(
                 "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+line,
                 {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
-            t = asyncio.create_task(self.call_all(cell, *args, **kwargs))
+            t = asyncio.create_task(self.run_all(cell, *args, **kwargs))
             self.last_magic = t
             self.magic_history.append(t)
             
-        def call_map(line, cell):
+        def run_map(line, cell):
             args, kwargs = [], {}
             eval(
                 "(lambda *a, **kw: _tkj_args.extend(a) or _tkj_kwargs.update(kw))"+line,
                 {**ipython.ns_table['user_global'], '_tkj_args': args, '_tkj_kwargs': kwargs}
             )
-            t = asyncio.create_task(self.call_map(cell, *args, **kwargs))
+            t = asyncio.create_task(self.run_map(cell, *args, **kwargs))
             self.last_magic = t
             self.magic_history.append(t)
 
@@ -62,12 +62,12 @@ class RemoteKernels:
             self.last_magic = t
             self.magic_history.append(t)
 
-        ipython.register_magic_function(call_one, 'cell', f'{self_name}.call_one')
-        ipython.register_magic_function(call_all, 'cell', f'{self_name}.call_all')
-        ipython.register_magic_function(call_map, 'cell', f'{self_name}.call_map')
+        ipython.register_magic_function(run_one, 'cell', f'{self_name}.run_one')
+        ipython.register_magic_function(run_all, 'cell', f'{self_name}.run_all')
+        ipython.register_magic_function(run_map, 'cell', f'{self_name}.run_map')
         ipython.register_magic_function(inject_code, 'cell', f'{self_name}.inject_code')
 
-    async def call_one(self, code, inputs=None, output=None, instance=None, scope=None, print_callback=None):
+    async def run_one(self, code, inputs=None, output=None, instance=None, scope=None, print_callback=None):
         if instance is None:
             instance = self.instances.popleft()
             self.instances.append(instance)
@@ -77,14 +77,14 @@ class RemoteKernels:
             return await instance.execute(code, inputs, scope=scope, print_callback=print_callback)[output]
         return await instance.execute(code, inputs, scope=scope, print_callback=print_callback)
     
-    async def call_all(self, code, inputs=None, output=None, scope=None, print_callback=None):
-        return await asyncio.gather(*[self.call_one(code, inputs, output, i, scope, print_callback) for i in self.instances])
+    async def run_all(self, code, inputs=None, output=None, scope=None, print_callback=None):
+        return await asyncio.gather(*[self.run_one(code, inputs, output, i, scope, print_callback) for i in self.instances])
     
-    async def call_map(self, code, variable_name, iterable, inputs=None, output=None, scope=None, print_callback=None):
+    async def run_map(self, code, variable_name, iterable, inputs=None, output=None, scope=None, print_callback=None):
         tasks = []
         for item in iterable:
             item_inputs = (inputs or {}).copy()
             item_inputs[variable_name] = item
-            tasks.append(self.call_one(code, item_inputs, output, None, scope, print_callback))
+            tasks.append(self.run_one(code, item_inputs, output, None, scope, print_callback))
         return await asyncio.gather(*tasks)
 
